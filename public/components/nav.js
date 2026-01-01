@@ -26,6 +26,9 @@ function createNavbar() {
                     <a href="/battleship.html" class="text-gray-300 hover:text-white px-3 py-2 rounded-md transition ${window.location.pathname.includes('battleship') ? 'bg-gray-700 text-white' : ''}">
                         Battleship
                     </a>
+                    <a href="/fps.html" class="text-gray-300 hover:text-white px-3 py-2 rounded-md transition ${window.location.pathname.includes('fps') ? 'bg-gray-700 text-white' : ''}">
+                        FPS Arena
+                    </a>
                 </div>
 
                 <!-- Mobile Menu Button (Optional) -->

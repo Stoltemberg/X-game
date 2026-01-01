@@ -166,6 +166,119 @@ io.on('connection', (socket) => {
                     io.to(roomName).emit('battleship_update', { turn: r.state.turn });
                 }
             });
+        } else if (gameType === 'fps') {
+            // Init player
+            const r = rooms[roomName];
+            if (r) {
+                r.state.players[socket.id] = {
+                    id: socket.id,
+                    position: { x: 0, y: 10, z: 0 },
+                    health: 100,
+                    shield: 0,
+                    color: Math.random() * 0xffffff
+                };
+            }
+
+            socket.on('fps_move', (pos) => {
+                const r = rooms[roomName];
+                if (!r || !r.state.players[socket.id]) return;
+                r.state.players[socket.id].position = pos;
+            });
+
+            socket.on('fps_shoot', ({ position, direction }) => {
+                const r = rooms[roomName];
+                if (!r) return;
+                const player = r.state.players[socket.id];
+                if (!player) return;
+
+                // Weapon Stats
+                const weapons = {
+                    'pistol': { damage: 15, range: 400, color: 0xffff00 },
+                    'rifle': { damage: 8, range: 600, color: 0x00ffff },
+                    'railgun': { damage: 45, range: 1000, color: 0xff0000 }
+                };
+                const w = weapons[player.weapon || 'pistol'];
+
+                socket.broadcast.to(roomName).emit('fps_shot_fired', {
+                    from: position,
+                    to: direction,
+                    color: w.color
+                });
+
+                Object.keys(r.state.players).forEach(targetId => {
+                    if (targetId === socket.id) return;
+                    const target = r.state.players[targetId];
+
+                    const dx = target.position.x - position.x;
+                    const dy = target.position.y - position.y;
+                    const dz = target.position.z - position.z;
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                    const vx = dx / dist;
+                    const vy = dy / dist;
+                    const vz = dz / dist;
+
+                    const dot = vx * direction.x + vy * direction.y + vz * direction.z;
+
+                    // Hit detection cone and range check
+                    if (dot > 0.95 && dist < w.range) {
+                        let dmg = w.damage;
+
+                        if (target.shield > 0) {
+                            target.shield -= dmg;
+                            if (target.shield < 0) {
+                                target.health += target.shield;
+                                target.shield = 0;
+                            }
+                        } else {
+                            target.health -= dmg;
+                        }
+
+                        if (target.health <= 0) {
+                            target.health = 100;
+                            target.shield = 0;
+                            target.position = { x: (Math.random() - 0.5) * 500, y: 10, z: (Math.random() - 0.5) * 500 };
+                        }
+                    }
+                });
+            });
+
+            socket.on('fps_collect', (itemId) => {
+                const r = rooms[roomName];
+                // Check powerups
+                if (r.state.powerups[itemId]) {
+                    const p = r.state.players[socket.id];
+                    const pu = r.state.powerups[itemId];
+
+                    const dx = p.position.x - pu.position.x;
+                    const dy = p.position.y - pu.position.y;
+                    const dz = p.position.z - pu.position.z;
+
+                    if (Math.sqrt(dx * dx + dy * dy + dz * dz) < 20) {
+                        if (pu.type === 'shield') p.shield = Math.min(p.shield + 20, 100);
+                        if (pu.type === 'health') p.health = Math.min(p.health + 20, 100);
+                        // Weapon pickups
+                        if (pu.type === 'rifle' || pu.type === 'railgun') {
+                            p.weapon = pu.type;
+                            io.to(roomName).emit('player_update', { id: socket.id, weapon: p.weapon });
+                        }
+
+                        delete r.state.powerups[itemId];
+
+                        setTimeout(() => {
+                            if (rooms[roomName]) {
+                                const newId = Date.now() + Math.random();
+                                const types = ['health', 'shield', 'rifle', 'railgun'];
+                                rooms[roomName].state.powerups[newId] = {
+                                    id: newId,
+                                    type: types[Math.floor(Math.random() * types.length)],
+                                    position: { x: (Math.random() - 0.5) * 800, y: 5, z: (Math.random() - 0.5) * 800 }
+                                };
+                            }
+                        }, 15000);
+                    }
+                }
+            });
         }
 
         // --- Shared Chat ---
@@ -197,9 +310,35 @@ function initializeGameState(type) {
             // Placeholder for battleship
             gameActive: false
         }
+    } else if (type === 'fps') {
+        const powerups = {};
+        for (let i = 0; i < 15; i++) {
+            const id = 'p' + i;
+            const types = ['health', 'shield', 'rifle', 'railgun'];
+            powerups[id] = {
+                id: id,
+                type: types[i % types.length],
+                position: { x: (Math.random() - 0.5) * 800, y: 5, z: (Math.random() - 0.5) * 800 }
+            };
+        }
+        return {
+            players: {},
+            powerups: powerups,
+            gameActive: true
+        }
     }
     return {};
 }
+
+// Global Game Loop for FPS
+setInterval(() => {
+    Object.keys(rooms).forEach(roomName => {
+        const room = rooms[roomName];
+        if (room.type === 'fps' && room.state.gameActive) {
+            io.to(roomName).emit('fps_state', room.state);
+        }
+    });
+}, 1000 / 30); // 30Hz
 
 function checkTicTacToeWin(board) {
     const winConditions = [

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer FPS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/components/nav.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+
+
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-family: sans-serif;
+            font-size: 24px;
+            text-shadow: 2px 2px 2px black;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900">
+
+
+    <div id="hud">
+        <div class="mb-2 text-green-400">Health: <span id="health">100</span>%</div>
+        <div class="mb-2 text-blue-400">Shield: <span id="shield">0</span>%</div>
+    </div>
+
+    <div id="blocker" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+        <div class="text-center text-white p-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+            <h1
+                class="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">
+                Cyber Arena 3D
+            </h1>
+            <p class="mb-8 text-xl text-gray-300">
+                WASD to Move • Click to Shoot • SPACE to Jump
+                <br>
+                Collect <span class="text-green-400">Green Orbs</span> for Health
+                <br>
+                Collect <span class="text-blue-400">Blue Orbs</span> for Shield
+            </p>
+            <button id="play-btn"
+                class="px-8 py-3 bg-red-600 hover:bg-red-700 rounded-lg text-xl font-bold transition transform hover:scale-105">
+                CLICK TO PLAY
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/fps-game.js"></script>
+</body>
+
+</html>
