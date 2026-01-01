@@ -15,19 +15,77 @@ const rooms = {};
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    socket.on('join_game', (gameType) => {
+    socket.on('get_lobbies', (gameType) => {
+        console.log('Request for lobbies:', gameType);
+        console.log('Current Rooms:', Object.keys(rooms));
+        const lobbyList = []; // ...
+        for (const [id, room] of Object.entries(rooms)) {
+            if (room.type === gameType) {
+                lobbyList.push({ id: id, count: Object.keys(room.players).length });
+            }
+        }
+        console.log('Sending lobbies:', lobbyList);
+        socket.emit('lobby_list', lobbyList);
+    });
+
+    socket.on('join_game', (data) => {
+        let gameType, requestedRoomId;
+
+        if (typeof data === 'object') {
+            gameType = data.type;
+            requestedRoomId = data.roomId;
+        } else {
+            gameType = data;
+        }
+
         // Find a room with available space for this game type
         let roomName = null;
-        for (const [id, room] of Object.entries(rooms)) {
-            if (room.type === gameType && Object.keys(room.players).length < 2) {
-                roomName = id;
-                break;
+
+        if (requestedRoomId) {
+            // Join specific room if exists
+            if (rooms[requestedRoomId] && rooms[requestedRoomId].type === gameType) {
+                roomName = requestedRoomId;
+            } else if (!rooms[requestedRoomId]) {
+                // If specific room requested but doesn't exist, create it (or should we fail? Let's create for flexibility, or maybe null to auto-create)
+                // Actually the user wants to SELECT existing. If they select one that's gone, we should probably error or just new one.
+                // Let's create new if unique ID proposed, or just auto-create standard if not found.
+                // For simplicity: If requested ID not found, treat as new creation if intended, or just fall back to valid logic.
+
+                // If it's a "create" request, maybe we pass a flag?
+                // Let's assume if roomId is passed, user wants THAT room. If not found, create it with that name (host).
+                roomName = requestedRoomId;
             }
         }
 
-        // If no room found, create one
         if (!roomName) {
-            roomName = `${gameType}_${Date.now()}`;
+            // Auto match
+            for (const [id, room] of Object.entries(rooms)) {
+                // Must match game type
+                if (room.type !== gameType) continue;
+
+                const count = Object.keys(room.players).length;
+
+                if (gameType === 'fps') {
+                    if (count < 10) { // Max 10 for FPS
+                        roomName = id;
+                        break;
+                    }
+                } else {
+                    // Classic games 2 players
+                    if (count < 2) {
+                        roomName = id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // If no room found (or creating new specific), create one
+        if (!roomName) {
+            roomName = requestedRoomId || `${gameType}_${Date.now()}`;
+        }
+
+        if (!rooms[roomName]) {
             rooms[roomName] = {
                 type: gameType,
                 players: {},
@@ -35,8 +93,15 @@ io.on('connection', (socket) => {
             };
         }
 
-        socket.join(roomName);
         const room = rooms[roomName];
+        if (gameType === 'fps' && Object.keys(room.players).length >= 10) {
+            socket.emit('error', 'Room full');
+            return;
+        }
+
+        socket.join(roomName);
+        // const room = rooms[roomName]; // Already declared above
+
 
         // Assign Role
         const existingRoles = Object.values(room.players);
@@ -51,6 +116,7 @@ io.on('connection', (socket) => {
         }
 
         room.players[socket.id] = role;
+        console.log(`Socket ${socket.id} joined room ${roomName} as ${role} (Type: ${gameType})`);
         socket.emit('player_role', role);
         socket.emit('room_joined', roomName); // Notify client of room name
 
@@ -68,17 +134,30 @@ io.on('connection', (socket) => {
             console.log('User disconnected:', socket.id);
             if (rooms[roomName] && rooms[roomName].players[socket.id]) {
                 delete rooms[roomName].players[socket.id];
-                // Reset or Pausing game logic depending on game? 
-                // For now, simple logic: stop game
-                rooms[roomName].state.gameActive = false;
-                if (gameType === 'tictactoe') rooms[roomName].state.board = Array(9).fill(null);
 
                 io.to(roomName).emit('player_left');
-                io.to(roomName).emit('game_update', rooms[roomName].state);
 
-                // Cleanup empty room
-                if (Object.keys(rooms[roomName].players).length === 0) {
-                    delete rooms[roomName];
+                // Determine if game should end
+                if (gameType === 'fps') {
+                    // FPS: Only stop if empty
+                    if (Object.keys(rooms[roomName].players).length === 0) {
+                        rooms[roomName].state.gameActive = false;
+                        delete rooms[roomName];
+                        console.log('FPS Room destroyed:', roomName);
+                    } else {
+                        io.to(roomName).emit('game_update', rooms[roomName].state);
+                    }
+                } else {
+                    // Classic Games: Stop if anyone leaves
+                    rooms[roomName].state.gameActive = false;
+                    if (gameType === 'tictactoe') rooms[roomName].state.board = Array(9).fill(null);
+
+                    io.to(roomName).emit('game_update', rooms[roomName].state);
+
+                    // Cleanup empty room
+                    if (Object.keys(rooms[roomName].players).length === 0) {
+                        delete rooms[roomName];
+                    }
                 }
             }
         });

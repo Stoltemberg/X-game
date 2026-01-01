@@ -28,6 +28,7 @@
 </head>
 
 <body class="bg-gray-900">
+    <nav-component></nav-component>
 
 
     <div id="hud">
@@ -35,14 +36,54 @@
         <div class="mb-2 text-blue-400">Shield: <span id="shield">0</span>%</div>
     </div>
 
-    <div id="blocker" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50">
+    <div id="lobby-screen" class="absolute inset-0 flex items-center justify-center bg-gray-900 z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-96">
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">Game Lobby</h2>
+
+            <div class="mb-6">
+                <button id="create-btn"
+                    class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded font-bold mb-4">
+                    Quick Play
+                </button>
+                <div class="text-gray-400 mb-2">Available Lobbies:</div>
+                <div id="lobby-list" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Lobbies injected here -->
+                    <div class="text-gray-500 text-sm text-center">Searching...</div>
+                </div>
+                <button id="refresh-btn"
+                    class="w-full mt-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">
+                    Refresh List
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoreboard (Hidden by default) -->
+    <div id="scoreboard"
+        class="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-80 p-6 rounded-lg hidden z-40 min-w-[400px]">
+        <h3 class="text-xl text-white font-bold mb-4 text-center border-b border-gray-600 pb-2">Active Players</h3>
+        <table class="w-full text-left text-gray-200">
+            <thead>
+                <tr class="text-yellow-400 border-b border-gray-700">
+                    <th class="pb-2">ID</th>
+                    <th class="pb-2 text-right">Health</th>
+                    <th class="pb-2 text-right">Shield</th>
+                </tr>
+            </thead>
+            <tbody id="scoreboard-body">
+                <!-- Rows -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="blocker" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 z-40 hidden">
         <div class="text-center text-white p-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
             <h1
                 class="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">
                 Cyber Arena 3D
             </h1>
             <p class="mb-8 text-xl text-gray-300">
-                WASD to Move • Click to Shoot • SPACE to Jump
+                WASD to Move • Click to Shoot • SPACE to Jump • TAB Scoreboard
                 <br>
                 Collect <span class="text-green-400">Green Orbs</span> for Health
                 <br>
