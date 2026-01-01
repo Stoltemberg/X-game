@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Tic-Tac-Toe</title>
+    <link rel="icon" href="https://fav.farm/❌" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/components/nav.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .cell {
+            transition: all 0.2s;
+        }
+
+        .cell:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 flex flex-col items-center">
+        <h1 class="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+            Tic-Tac-Toe Live
+        </h1>
+
+        <div class="flex flex-col md:flex-row gap-8 w-full max-w-4xl">
+            <!-- Game Section -->
+            <div class="flex-1 flex flex-col items-center">
+                <div id="status" class="mb-4 text-xl font-semibold text-gray-300">
+                    Connecting...
+                </div>
+
+                <div id="game-board"
+                    class="w-full max-w-[400px] grid grid-cols-3 gap-2 p-2 bg-gray-800 rounded-xl shadow-2xl mb-6">
+                    <!-- Cells will be generated here -->
+                </div>
+
+                <button id="restart-btn"
+                    class="hidden px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg font-bold hover:scale-105 transition transform shadow-lg">
+                    Play Again
+                </button>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="flex-1 bg-gray-800 rounded-xl shadow-2xl overflow-hidden flex flex-col h-[500px]">
+                <div class="p-4 bg-gray-700 border-b border-gray-600">
+                    <h2 class="font-bold text-lg">Live Chat</h2>
+                </div>
+                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-2">
+                    <!-- Messages will appear here -->
+                </div>
+                <form id="chat-form" class="p-4 bg-gray-700 border-t border-gray-600 flex gap-2">
+                    <input type="text" id="chat-input"
+                        class="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Type a message..." autocomplete="off">
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/tictactoe.js"></script>
+</body>
+
+</html>

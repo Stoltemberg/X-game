@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub - Play Real-time Games</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/components/nav.js"></script>
+    <style>
+        .game-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen font-sans">
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center mb-16">
+            <h1
+                class="text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500">
+                Welcome to GameHub
+            </h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                Play classic games with friends in real-time. Choose a game below to get started!
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+            <!-- Tic Tac Toe Card -->
+            <a href="/tictactoe.html"
+                class="game-card block bg-gray-800 rounded-2xl p-6 shadow-2xl transition duration-300 border border-gray-700 hover:border-blue-500 group">
+                <div
+                    class="h-48 rounded-xl bg-gradient-to-br from-blue-600 to-blue-900 mb-6 flex items-center justify-center text-8xl shadow-inner">
+                    ❌
+                </div>
+                <h2 class="text-2xl font-bold mb-2 group-hover:text-blue-400 transition">Tic-Tac-Toe</h2>
+                <p class="text-gray-400">The classic game of X's and O's. Challenge a friend or play against a stranger!
+                </p>
+                <div class="mt-4 flex items-center text-blue-400 font-semibold">
+                    Play Now <span class="ml-2 transform group-hover:translate-x-1 transition">→</span>
+                </div>
+            </a>
+
+            <!-- Chess Card -->
+            <a href="/chess.html"
+                class="game-card block bg-gray-800 rounded-2xl p-6 shadow-2xl transition duration-300 border border-gray-700 hover:border-purple-500 group">
+                <div
+                    class="h-48 rounded-xl bg-gradient-to-br from-purple-600 to-purple-900 mb-6 flex items-center justify-center text-8xl shadow-inner">
+                    ♟️
+                </div>
+                <h2 class="text-2xl font-bold mb-2 group-hover:text-purple-400 transition">Chess</h2>
+                <p class="text-gray-400">Strategy at its finest. Play the royal game in real-time.</p>
+                <div class="mt-4 flex items-center text-purple-400 font-semibold">
+                    Play Now <span class="ml-2 transform group-hover:translate-x-1 transition">→</span>
+                </div>
+            </a>
+
+            <!-- Battleship Card -->
+            <a href="/battleship.html"
+                class="game-card block bg-gray-800 rounded-2xl p-6 shadow-2xl transition duration-300 border border-gray-700 hover:border-pink-500 group">
+                <div
+                    class="h-48 rounded-xl bg-gradient-to-br from-pink-600 to-pink-900 mb-6 flex items-center justify-center text-8xl shadow-inner">
+                    🚢
+                </div>
+                <h2 class="text-2xl font-bold mb-2 group-hover:text-pink-400 transition">Battleship</h2>
+                <p class="text-gray-400">Sink your opponent's fleet before they sink yours! Tactical warfare.</p>
+                <div class="mt-4 flex items-center text-pink-400 font-semibold">
+                    Play Now <span class="ml-2 transform group-hover:translate-x-1 transition">→</span>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
